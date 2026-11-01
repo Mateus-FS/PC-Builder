@@ -1,4 +1,4 @@
-package com.example.pc_builder.ui.catalogo
+package com.example.pc_builder.ui.detalhes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,10 +37,10 @@ import com.example.pc_builder.util.formatarPreco
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetalheComponenteScreen(
+fun DetalhesComponenteScreen(
     onVoltar: () -> Unit,
     onEditar: (Long) -> Unit,
-    viewModel: ComponenteViewModel = viewModel(factory = ComponenteViewModel.Factory)
+    viewModel: DetalhesComponenteViewModel = viewModel(factory = DetalhesComponenteViewModel .Factory)
 ) {
     val componente by viewModel.componente.collectAsStateWithLifecycle()
     var confirmandoExclusao by rememberSaveable { mutableStateOf(false) }

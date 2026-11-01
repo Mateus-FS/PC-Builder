@@ -1,11 +1,10 @@
-package com.example.pc_builder.data.local
+package com.example.pc_builder.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.pc_builder.model.CategoriaComponente
 
 @Entity(tableName = "componentes")
-data class ComponenteEntity(
+data class Componente(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val nome: String,
     val categoria: CategoriaComponente,
@@ -13,5 +12,5 @@ data class ComponenteEntity(
     val modelo: String,
     val preco: Double,
     val loja: String,
-    val descricao: String? = null   // opcional
+    val descricao: String? = null
 )

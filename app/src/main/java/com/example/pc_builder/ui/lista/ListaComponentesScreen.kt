@@ -1,4 +1,4 @@
-package com.example.pc_builder.ui.catalogo
+package com.example.pc_builder.ui.lista
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.pc_builder.data.local.ComponenteEntity
 import com.example.pc_builder.model.CategoriaComponente
+import com.example.pc_builder.model.Componente
 import com.example.pc_builder.util.formatarPreco
 
 @Composable
@@ -128,7 +128,7 @@ fun ListaComponentesScreen(
 }
 
 @Composable
-private fun ComponenteItem(componente: ComponenteEntity, onClick: () -> Unit) {
+private fun ComponenteItem(componente: Componente, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

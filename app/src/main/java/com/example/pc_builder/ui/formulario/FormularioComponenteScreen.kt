@@ -1,8 +1,6 @@
-package com.example.pc_builder.ui.catalogo
+package com.example.pc_builder.ui.formulario
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,11 +11,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,19 +32,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.pc_builder.data.local.ComponenteEntity
 import com.example.pc_builder.model.CategoriaComponente
+import com.example.pc_builder.model.Componente
 import com.example.pc_builder.util.precoParaCampo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormularioComponenteScreen(
     onVoltar: () -> Unit,
-    viewModel: ComponenteViewModel = viewModel(factory = ComponenteViewModel.Factory)
+    viewModel: FormularioComponenteViewModel = viewModel(factory = FormularioComponenteViewModel.Factory)
 ) {
     val existente by viewModel.componente.collectAsStateWithLifecycle()
 
@@ -75,8 +76,9 @@ fun FormularioComponenteScreen(
     }
 
     val precoNumero = preco.replace(',', '.').toDoubleOrNull()
+    val precoValido = precoNumero != null && precoNumero > 0
     val valido = nome.isNotBlank() && marca.isNotBlank() && modelo.isNotBlank() &&
-            loja.isNotBlank() && precoNumero != null && precoNumero > 0
+            loja.isNotBlank() && precoValido
 
     Scaffold(
         topBar = {
@@ -103,17 +105,36 @@ fun FormularioComponenteScreen(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Campo(nome, { nome = it }, "Nome do componente *", tentouSalvar && nome.isBlank())
+            Campo(
+                valor = nome,
+                aoMudar = { nome = it },
+                rotulo = "Nome do componente *",
+                erro = tentouSalvar && nome.isBlank(),
+                capitalization = KeyboardCapitalization.Words
+            )
 
-            SeletorCategoria(categoria) { categoria = it }
+            SeletorCategoria(
+                selecionada = categoria,
+                aoSelecionar = { categoria = it }
+            )
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(Modifier.weight(1f)) {
-                    Campo(marca, { marca = it }, "Marca *", tentouSalvar && marca.isBlank())
-                }
-                Box(Modifier.weight(1f)) {
-                    Campo(modelo, { modelo = it }, "Modelo *", tentouSalvar && modelo.isBlank())
-                }
+                Campo(
+                    valor = marca,
+                    aoMudar = { marca = it },
+                    rotulo = "Marca *",
+                    erro = tentouSalvar && marca.isBlank(),
+                    capitalization = KeyboardCapitalization.Words,
+                    modifier = Modifier.weight(1f)
+                )
+                Campo(
+                    valor = modelo,
+                    aoMudar = { modelo = it },
+                    rotulo = "Modelo *",
+                    erro = tentouSalvar && modelo.isBlank(),
+                    capitalization = KeyboardCapitalization.Words,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
             Text("Compra", style = MaterialTheme.typography.titleLarge)
@@ -122,23 +143,36 @@ fun FormularioComponenteScreen(
                 valor = preco,
                 aoMudar = { preco = it },
                 rotulo = "Preço (R$) *",
-                erro = tentouSalvar && (precoNumero == null || precoNumero <= 0),
+                erro = tentouSalvar && !precoValido,
+                mensagemErro = if (preco.isNotBlank() && precoNumero == null) "Preço inválido" else "Informe um preço maior que zero",
                 teclado = KeyboardType.Decimal
             )
-            Campo(loja, { loja = it }, "Loja *", tentouSalvar && loja.isBlank())
+
+            Campo(
+                valor = loja,
+                aoMudar = { loja = it },
+                rotulo = "Loja *",
+                erro = tentouSalvar && loja.isBlank(),
+                capitalization = KeyboardCapitalization.Words
+            )
+
             Campo(
                 valor = descricao,
                 aoMudar = { descricao = it },
                 rotulo = "Descrição (opcional)",
                 erro = false,
-                linhaUnica = false
+                linhaUnica = false,
+                imeAction = ImeAction.Done
             )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedButton(onClick = onVoltar, modifier = Modifier.weight(1f)) {
+                OutlinedButton(
+                    onClick = onVoltar,
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text("Cancelar")
                 }
                 Button(
@@ -147,13 +181,13 @@ fun FormularioComponenteScreen(
                         tentouSalvar = true
                         if (valido) {
                             viewModel.salvar(
-                                ComponenteEntity(
+                                Componente(
                                     id = existente?.id ?: 0,
                                     nome = nome.trim(),
                                     categoria = categoria,
                                     marca = marca.trim(),
                                     modelo = modelo.trim(),
-                                    preco = precoNumero!!,
+                                    preco = precoNumero,
                                     loja = loja.trim(),
                                     descricao = descricao.trim().ifBlank { null }
                                 ),
@@ -173,7 +207,11 @@ private fun Campo(
     aoMudar: (String) -> Unit,
     rotulo: String,
     erro: Boolean,
+    modifier: Modifier = Modifier,
+    mensagemErro: String = "Campo obrigatório ou inválido",
     teclado: KeyboardType = KeyboardType.Text,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
+    imeAction: ImeAction = ImeAction.Next,
     linhaUnica: Boolean = true
 ) {
     OutlinedTextField(
@@ -181,14 +219,19 @@ private fun Campo(
         onValueChange = aoMudar,
         label = { Text(rotulo) },
         isError = erro,
-        supportingText = if (erro) ({ Text("Campo obrigatório ou inválido") }) else null,
+        supportingText = if (erro) { { Text(mensagemErro) } } else null,
         singleLine = linhaUnica,
         minLines = if (linhaUnica) 1 else 3,
-        keyboardOptions = KeyboardOptions(keyboardType = teclado),
-        modifier = Modifier.fillMaxWidth()
+        keyboardOptions = KeyboardOptions(
+            keyboardType = teclado,
+            capitalization = capitalization,
+            imeAction = imeAction
+        ),
+        modifier = modifier.fillMaxWidth()
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SeletorCategoria(
     selecionada: CategoriaComponente,
@@ -196,22 +239,25 @@ private fun SeletorCategoria(
 ) {
     var aberto by rememberSaveable { mutableStateOf(false) }
 
-    Box {
+    ExposedDropdownMenuBox(
+        expanded = aberto,
+        onExpandedChange = { aberto = !aberto }
+    ) {
         OutlinedTextField(
             value = selecionada.rotulo,
             onValueChange = {},
             readOnly = true,
             label = { Text("Categoria *") },
-            trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth()
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = aberto) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth()
         )
-        // Camada transparente que captura o clique (o TextField readOnly "engole" cliques).
-        Box(
-            Modifier
-                .matchParentSize()
-                .clickable { aberto = true }
-        )
-        DropdownMenu(expanded = aberto, onDismissRequest = { aberto = false }) {
+        ExposedDropdownMenu(
+            expanded = aberto,
+            onDismissRequest = { aberto = false }
+        ) {
             CategoriaComponente.entries.forEach { cat ->
                 DropdownMenuItem(
                     text = { Text(cat.rotulo) },

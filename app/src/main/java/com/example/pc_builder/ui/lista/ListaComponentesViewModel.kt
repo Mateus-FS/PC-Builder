@@ -1,14 +1,14 @@
-package com.example.pc_builder.ui.catalogo
+package com.example.pc_builder.ui.lista
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.pc_builder.PcBuilderApp
-import com.example.pc_builder.data.local.ComponenteEntity
-import com.example.pc_builder.data.repository.ComponenteRepository
+import com.example.pc_builder.data.ComponenteRepository
 import com.example.pc_builder.model.CategoriaComponente
+import com.example.pc_builder.model.Componente
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,9 +26,7 @@ class ListaComponentesViewModel(repository: ComponenteRepository) : ViewModel() 
 
     val busca: StateFlow<String> = _busca.asStateFlow()
     val categoria: StateFlow<CategoriaComponente?> = _categoria.asStateFlow()
-
-    // Sempre que a busca OU a categoria mudam, a consulta ao Room é refeita.
-    val componentes: StateFlow<List<ComponenteEntity>> =
+    val componentes: StateFlow<List<Componente>> =
         combine(_busca, _categoria) { busca, categoria -> busca.trim() to categoria }
             .flatMapLatest { (busca, categoria) -> repository.observar(busca, categoria) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -39,7 +37,8 @@ class ListaComponentesViewModel(repository: ComponenteRepository) : ViewModel() 
     companion object {
         val Factory = viewModelFactory {
             initializer {
-                val app = this[APPLICATION_KEY] as PcBuilderApp
+                val app =
+                    this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as PcBuilderApp
                 ListaComponentesViewModel(app.componenteRepository)
             }
         }

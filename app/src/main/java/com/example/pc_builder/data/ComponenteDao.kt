@@ -1,29 +1,28 @@
-package com.example.pc_builder.data.local
+package com.example.pc_builder.data
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.example.pc_builder.model.Componente
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ComponenteDao {
 
     @Insert
-    suspend fun inserir(componente: ComponenteEntity): Long
+    suspend fun inserir(componente: Componente): Long
 
     @Update
-    suspend fun atualizar(componente: ComponenteEntity)
+    suspend fun atualizar(componente: Componente)
 
     @Delete
-    suspend fun excluir(componente: ComponenteEntity)
+    suspend fun excluir(componente: Componente)
 
     @Query("SELECT * FROM componentes WHERE id = :id")
-    fun observarPorId(id: Long): Flow<ComponenteEntity?>
+    fun observarPorId(id: Long): Flow<Componente?>
 
-    // Busca + filtro de categoria na mesma consulta.
-    // categoria = null  -> traz todas as categorias.
     @Query(
         """
         SELECT * FROM componentes
@@ -34,5 +33,5 @@ interface ComponenteDao {
         ORDER BY nome COLLATE NOCASE ASC
         """
     )
-    fun observar(busca: String, categoria: String?): Flow<List<ComponenteEntity>>
+    fun observar(busca: String, categoria: String?): Flow<List<Componente>>
 }

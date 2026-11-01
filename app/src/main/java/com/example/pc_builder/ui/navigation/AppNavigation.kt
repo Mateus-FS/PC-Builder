@@ -6,9 +6,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.pc_builder.ui.catalogo.DetalheComponenteScreen
-import com.example.pc_builder.ui.catalogo.FormularioComponenteScreen
-import com.example.pc_builder.ui.catalogo.ListaComponentesScreen
+import com.example.pc_builder.ui.detalhes.DetalhesComponenteScreen
+import com.example.pc_builder.ui.formulario.FormularioComponenteScreen
+import com.example.pc_builder.ui.lista.ListaComponentesScreen
 
 object Rotas {
     const val LISTA = "componentes"
@@ -35,9 +35,9 @@ fun AppNavigation() {
             route = Rotas.DETALHE,
             arguments = listOf(navArgument("id") { type = NavType.LongType })
         ) {
-            DetalheComponenteScreen(
+            DetalhesComponenteScreen(
                 onVoltar = { nav.popBackStack() },
-                onEditar = { nav.navigate(Rotas.formulario(it)) }
+                onEditar = { id -> nav.navigate(Rotas.formulario(id)) }
             )
         }
         composable(
