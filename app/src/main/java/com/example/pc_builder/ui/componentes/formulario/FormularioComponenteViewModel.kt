@@ -1,4 +1,5 @@
-package com.example.pc_builder.ui.detalhes
+package com.example.pc_builder.ui.componentes.formulario
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
@@ -8,23 +9,29 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.pc_builder.PcBuilderApp
 import com.example.pc_builder.data.ComponenteRepository
 import com.example.pc_builder.model.Componente
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class DetalhesComponenteViewModel(
+class FormularioComponenteViewModel(
     private val repository: ComponenteRepository,
-    id: Long
+    id: Long?
 ) : ViewModel() {
 
     val componente: StateFlow<Componente?> =
-        repository.observarPorId(id)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        if (id != null) {
+            repository.observarPorId(id)
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        } else {
+            MutableStateFlow(null)
+        }
 
-    fun excluir(componente: Componente, aoConcluir: () -> Unit) {
+    fun salvar(componente: Componente, aoConcluir: () -> Unit) {
         viewModelScope.launch {
-            repository.excluir(componente)
+            if (componente.id == 0L) repository.inserir(componente)
+            else repository.atualizar(componente)
             aoConcluir()
         }
     }
@@ -33,8 +40,8 @@ class DetalhesComponenteViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as PcBuilderApp
-                val id = checkNotNull(createSavedStateHandle().get<Long>("id"))
-                DetalhesComponenteViewModel(app.componenteRepository, id)
+                val id = createSavedStateHandle().get<Long>("id")?.takeIf { it > 0 }
+                FormularioComponenteViewModel(app.componenteRepository, id)
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.example.pc_builder.ui.detalhes
+package com.example.pc_builder.ui.componentes.detalhes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

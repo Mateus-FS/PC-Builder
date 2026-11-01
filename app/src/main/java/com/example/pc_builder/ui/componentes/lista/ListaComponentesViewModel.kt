@@ -1,4 +1,4 @@
-package com.example.pc_builder.ui.lista
+package com.example.pc_builder.ui.componentes.lista
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

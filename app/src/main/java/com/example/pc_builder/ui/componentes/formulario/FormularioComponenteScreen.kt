@@ -1,4 +1,4 @@
-package com.example.pc_builder.ui.formulario
+package com.example.pc_builder.ui.componentes.formulario
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

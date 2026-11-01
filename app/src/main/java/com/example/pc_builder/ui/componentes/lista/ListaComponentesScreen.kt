@@ -1,4 +1,4 @@
-package com.example.pc_builder.ui.lista
+package com.example.pc_builder.ui.componentes.lista
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +41,7 @@ import com.example.pc_builder.util.formatarPreco
 fun ListaComponentesScreen(
     onAbrir: (Long) -> Unit,
     onCadastrar: () -> Unit,
+    onAbrirMontagens: () -> Unit,
     viewModel: ListaComponentesViewModel = viewModel(factory = ListaComponentesViewModel.Factory)
 ) {
     val busca by viewModel.busca.collectAsStateWithLifecycle()
@@ -61,15 +63,25 @@ fun ListaComponentesScreen(
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(Modifier.height(16.dp))
-            Text(
-                "Seu catálogo de peças",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                "Especificações e preços em um só lugar.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Seu catálogo de peças",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "Especificações e preços em um só lugar.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                FilledTonalButton(onClick = onAbrirMontagens) { Text("Montagens") }
+            }
+
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
