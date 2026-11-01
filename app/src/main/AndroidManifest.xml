@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PCBuilder">
         <activity
-            android:name=".MainActivity"
+            android:name=".PcBuilderApp"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.PCBuilder"
