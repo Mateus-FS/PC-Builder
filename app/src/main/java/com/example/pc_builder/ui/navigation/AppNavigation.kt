@@ -11,6 +11,7 @@ import com.example.pc_builder.ui.componentes.formulario.FormularioComponenteScre
 import com.example.pc_builder.ui.componentes.lista.ListaComponentesScreen
 import com.example.pc_builder.ui.montagens.editor.EditorMontagemScreen
 import com.example.pc_builder.ui.montagens.lista.ListaMontagensScreen
+import com.example.pc_builder.ui.configuracoes.ConfiguracoesScreen
 
 object Rotas {
     const val LISTA = "componentes"
@@ -18,6 +19,7 @@ object Rotas {
     const val FORMULARIO = "componentes/formulario?id={id}"
     const val MONTAGENS = "montagens"
     const val EDITOR_MONTAGEM = "montagens/editor?id={id}"
+    const val CONFIGURACOES = "configuracoes"
 
     fun detalhe(id: Long) = "componentes/$id"
     fun formulario(id: Long? = null) =
@@ -35,7 +37,8 @@ fun AppNavigation() {
             ListaComponentesScreen(
                 onAbrir = { nav.navigate(Rotas.detalhe(it)) },
                 onCadastrar = { nav.navigate(Rotas.formulario()) },
-                onAbrirMontagens = { nav.navigate(Rotas.MONTAGENS) }
+                onAbrirMontagens = { nav.navigate(Rotas.MONTAGENS) },
+                onAbrirConfiguracoes = { nav.navigate(Rotas.CONFIGURACOES) }   // NOVA
             )
         }
         composable(
@@ -71,6 +74,9 @@ fun AppNavigation() {
             })
         ) {
             EditorMontagemScreen(onVoltar = { nav.popBackStack() })
+        }
+        composable(Rotas.CONFIGURACOES) {                                      // NOVA
+            ConfiguracoesScreen(onVoltar = { nav.popBackStack() })
         }
     }
 }

@@ -36,12 +36,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pc_builder.model.CategoriaComponente
 import com.example.pc_builder.model.Componente
 import com.example.pc_builder.util.formatarPreco
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.IconButton
 
 @Composable
 fun ListaComponentesScreen(
     onAbrir: (Long) -> Unit,
     onCadastrar: () -> Unit,
     onAbrirMontagens: () -> Unit,
+    onAbrirConfiguracoes: () -> Unit,
     viewModel: ListaComponentesViewModel = viewModel(factory = ListaComponentesViewModel.Factory)
 ) {
     val busca by viewModel.busca.collectAsStateWithLifecycle()
@@ -80,6 +83,9 @@ fun ListaComponentesScreen(
                     )
                 }
                 FilledTonalButton(onClick = onAbrirMontagens) { Text("Montagens") }
+                IconButton(onClick = onAbrirConfiguracoes) {
+                    Icon(Icons.Default.Settings, contentDescription = "Configurações")
+                }
             }
 
             Spacer(Modifier.height(16.dp))
