@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.pc_builder.PcBuilderApp
-import com.example.pc_builder.data.ConfiguracoesRepository
+import com.example.pc_builder.data.configuracoes.ConfiguracoesRepository
 import com.example.pc_builder.model.Configuracoes
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,10 +16,8 @@ import kotlinx.coroutines.launch
 class ConfiguracoesViewModel(
     private val repository: ConfiguracoesRepository
 ) : ViewModel() {
-
-    // null = ainda lendo do disco (poucos milissegundos na abertura do app).
     val configuracoes: StateFlow<Configuracoes?> =
-        repository.configuracoes
+        repository.observar()
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun definirTemaEscuro(escuro: Boolean) {

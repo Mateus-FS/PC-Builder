@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.pc_builder.PcBuilderApp
-import com.example.pc_builder.data.ComponenteRepository
+import com.example.pc_builder.data.componentes.ComponenteRepository
 import com.example.pc_builder.model.Componente
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

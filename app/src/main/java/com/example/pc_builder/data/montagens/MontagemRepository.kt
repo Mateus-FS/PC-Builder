@@ -1,4 +1,4 @@
-package com.example.pc_builder.data
+package com.example.pc_builder.data.montagens
 
 import com.example.pc_builder.model.Montagem
 import com.example.pc_builder.model.MontagemComComponentes

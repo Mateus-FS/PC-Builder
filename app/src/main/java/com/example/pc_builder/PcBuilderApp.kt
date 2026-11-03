@@ -3,15 +3,15 @@ package com.example.pc_builder
 import android.app.Application
 import androidx.room.Room
 import com.example.pc_builder.data.AppDatabase
-import com.example.pc_builder.data.ComponenteRepository
-import com.example.pc_builder.data.ConfiguracoesRepository
-import com.example.pc_builder.data.MontagemRepository
-import com.example.pc_builder.data.configuracoesDataStore
+import com.example.pc_builder.data.componentes.ComponenteRepository
+import com.example.pc_builder.data.configuracoes.ConfiguracoesRepository
+import com.example.pc_builder.data.montagens.MontagemRepository
+import com.example.pc_builder.data.configuracoes.configuracoesDataStore
 
 class PcBuilderApp : Application() {
     val database by lazy {
         Room.databaseBuilder(this, AppDatabase::class.java, "pcbuilder.db")
-            .fallbackToDestructiveMigration(false)
+            .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
     val componenteRepository by lazy { ComponenteRepository(database.componenteDao()) }

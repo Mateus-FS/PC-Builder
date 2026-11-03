@@ -1,6 +1,9 @@
 package com.example.pc_builder.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,9 +12,9 @@ import androidx.navigation.navArgument
 import com.example.pc_builder.ui.componentes.detalhes.DetalhesComponenteScreen
 import com.example.pc_builder.ui.componentes.formulario.FormularioComponenteScreen
 import com.example.pc_builder.ui.componentes.lista.ListaComponentesScreen
+import com.example.pc_builder.ui.configuracoes.ConfiguracoesScreen
 import com.example.pc_builder.ui.montagens.editor.EditorMontagemScreen
 import com.example.pc_builder.ui.montagens.lista.ListaMontagensScreen
-import com.example.pc_builder.ui.configuracoes.ConfiguracoesScreen
 
 object Rotas {
     const val LISTA = "componentes"
@@ -28,19 +31,51 @@ object Rotas {
         if (id == null) "montagens/editor" else "montagens/editor?id=$id"
 }
 
+private fun NavGraphBuilder.telaPrincipal(
+    rota: String,
+    conteudo: @Composable () -> Unit
+) {
+    composable(
+        route = rota,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None }
+    ) { conteudo() }
+}
+
 @Composable
 fun AppNavigation() {
     val nav = rememberNavController()
 
+    val navegarPrincipal: (String) -> Unit = { rota ->
+        nav.navigate(rota) {
+            popUpTo(Rotas.LISTA) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     NavHost(navController = nav, startDestination = Rotas.LISTA) {
-        composable(Rotas.LISTA) {
+
+        telaPrincipal(Rotas.LISTA) {
             ListaComponentesScreen(
                 onAbrir = { nav.navigate(Rotas.detalhe(it)) },
                 onCadastrar = { nav.navigate(Rotas.formulario()) },
-                onAbrirMontagens = { nav.navigate(Rotas.MONTAGENS) },
-                onAbrirConfiguracoes = { nav.navigate(Rotas.CONFIGURACOES) }   // NOVA
+                onNavegar = navegarPrincipal
             )
         }
+        telaPrincipal(Rotas.MONTAGENS) {
+            ListaMontagensScreen(
+                onAbrir = { nav.navigate(Rotas.editorMontagem(it)) },
+                onCriar = { nav.navigate(Rotas.editorMontagem()) },
+                onNavegar = navegarPrincipal
+            )
+        }
+        telaPrincipal(Rotas.CONFIGURACOES) {
+            ConfiguracoesScreen(onNavegar = navegarPrincipal)
+        }
+
         composable(
             route = Rotas.DETALHE,
             arguments = listOf(navArgument("id") { type = NavType.LongType })
@@ -59,13 +94,6 @@ fun AppNavigation() {
         ) {
             FormularioComponenteScreen(onVoltar = { nav.popBackStack() })
         }
-        composable(Rotas.MONTAGENS) {
-            ListaMontagensScreen(
-                onVoltar = { nav.popBackStack() },
-                onAbrir = { nav.navigate(Rotas.editorMontagem(it)) },
-                onCriar = { nav.navigate(Rotas.editorMontagem()) }
-            )
-        }
         composable(
             route = Rotas.EDITOR_MONTAGEM,
             arguments = listOf(navArgument("id") {
@@ -74,9 +102,6 @@ fun AppNavigation() {
             })
         ) {
             EditorMontagemScreen(onVoltar = { nav.popBackStack() })
-        }
-        composable(Rotas.CONFIGURACOES) {                                      // NOVA
-            ConfiguracoesScreen(onVoltar = { nav.popBackStack() })
         }
     }
 }

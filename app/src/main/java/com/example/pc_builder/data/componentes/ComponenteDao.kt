@@ -1,4 +1,4 @@
-package com.example.pc_builder.data
+package com.example.pc_builder.data.componentes
 
 import androidx.room.Dao
 import androidx.room.Delete

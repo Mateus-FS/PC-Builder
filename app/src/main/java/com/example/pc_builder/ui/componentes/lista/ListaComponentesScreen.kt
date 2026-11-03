@@ -1,5 +1,6 @@
 package com.example.pc_builder.ui.componentes.lista
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,14 +18,17 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -35,29 +39,40 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pc_builder.model.CategoriaComponente
 import com.example.pc_builder.model.Componente
+import com.example.pc_builder.ui.navigation.BarraNavegacao
+import com.example.pc_builder.ui.navigation.Rotas
 import com.example.pc_builder.util.formatarPreco
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.IconButton
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaComponentesScreen(
     onAbrir: (Long) -> Unit,
     onCadastrar: () -> Unit,
-    onAbrirMontagens: () -> Unit,
-    onAbrirConfiguracoes: () -> Unit,
+    onNavegar: (String) -> Unit,
     viewModel: ListaComponentesViewModel = viewModel(factory = ListaComponentesViewModel.Factory)
 ) {
     val busca by viewModel.busca.collectAsStateWithLifecycle()
     val categoria by viewModel.categoria.collectAsStateWithLifecycle()
     val componentes by viewModel.componentes.collectAsStateWithLifecycle()
 
+    val cores = MaterialTheme.colorScheme
+    val coresChip = FilterChipDefaults.filterChipColors(
+        selectedContainerColor = cores.primaryContainer,
+        selectedLabelColor = cores.onPrimaryContainer
+    )
+
     Scaffold(
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onCadastrar,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Cadastrar componente") }
+        topBar = {
+            TopAppBar(
+                title = { Text("Catálogo", fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = cores.background)
             )
+        },
+        bottomBar = { BarraNavegacao(rotaAtual = Rotas.LISTA, onNavegar = onNavegar) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onCadastrar) {
+                Icon(Icons.Default.Add, contentDescription = "Cadastrar componente")
+            }
         }
     ) { padding ->
         Column(
@@ -65,31 +80,6 @@ fun ListaComponentesScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            Spacer(Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        "Seu catálogo de peças",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "Especificações e preços em um só lugar.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                FilledTonalButton(onClick = onAbrirMontagens) { Text("Montagens") }
-                IconButton(onClick = onAbrirConfiguracoes) {
-                    Icon(Icons.Default.Settings, contentDescription = "Configurações")
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
             OutlinedTextField(
                 value = busca,
                 onValueChange = viewModel::onBuscaChange,
@@ -107,14 +97,16 @@ fun ListaComponentesScreen(
                     FilterChip(
                         selected = categoria == null,
                         onClick = { viewModel.onCategoriaChange(null) },
-                        label = { Text("Todas") }
+                        label = { Text("Todas") },
+                        colors = coresChip
                     )
                 }
                 items(CategoriaComponente.entries) { cat ->
                     FilterChip(
                         selected = categoria == cat,
                         onClick = { viewModel.onCategoriaChange(if (categoria == cat) null else cat) },
-                        label = { Text(cat.rotuloCurto) }
+                        label = { Text(cat.rotuloCurto) },
+                        colors = coresChip
                     )
                 }
             }
@@ -129,7 +121,7 @@ fun ListaComponentesScreen(
             if (componentes.isEmpty()) {
                 Text(
                     "Nenhum componente encontrado.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = cores.onSurfaceVariant
                 )
             }
 
@@ -151,7 +143,8 @@ private fun ComponenteItem(componente: Componente, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier
@@ -180,7 +173,7 @@ private fun ComponenteItem(componente: Componente, onClick: () -> Unit) {
                 Text(
                     componente.categoria.rotulo,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }

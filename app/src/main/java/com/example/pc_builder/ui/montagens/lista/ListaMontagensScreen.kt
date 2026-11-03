@@ -1,5 +1,6 @@
 package com.example.pc_builder.ui.montagens.lista
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,18 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,35 +31,33 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pc_builder.model.MontagemComComponentes
+import com.example.pc_builder.ui.navigation.BarraNavegacao
+import com.example.pc_builder.ui.navigation.Rotas
 import com.example.pc_builder.util.formatarPreco
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaMontagensScreen(
-    onVoltar: () -> Unit,
     onAbrir: (Long) -> Unit,
     onCriar: () -> Unit,
+    onNavegar: (String) -> Unit,
     viewModel: ListaMontagensViewModel = viewModel(factory = ListaMontagensViewModel.Factory)
 ) {
     val montagens by viewModel.montagens.collectAsStateWithLifecycle()
+    val cores = MaterialTheme.colorScheme
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Minhas montagens") },
-                navigationIcon = {
-                    IconButton(onClick = onVoltar) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
-                    }
-                }
+                title = { Text("Montagens", fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = cores.background)
             )
         },
+        bottomBar = { BarraNavegacao(rotaAtual = Rotas.MONTAGENS, onNavegar = onNavegar) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onCriar,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Nova montagem") }
-            )
+            FloatingActionButton(onClick = onCriar) {
+                Icon(Icons.Default.Add, contentDescription = "Nova montagem")
+            }
         }
     ) { padding ->
         Column(
@@ -70,13 +68,13 @@ fun ListaMontagensScreen(
             if (montagens.isEmpty()) {
                 Text(
                     "Nenhuma montagem salva ainda.",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 16.dp)
+                    color = cores.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp)
+                contentPadding = PaddingValues(top = 8.dp, bottom = 88.dp)
             ) {
                 items(montagens, key = { it.montagem.id }) { item ->
                     MontagemItem(item, onClick = { onAbrir(item.montagem.id) })
@@ -93,7 +91,8 @@ private fun MontagemItem(item: MontagemComComponentes, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier
