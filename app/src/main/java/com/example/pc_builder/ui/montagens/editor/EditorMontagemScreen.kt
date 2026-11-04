@@ -1,3 +1,4 @@
+
 package com.example.pc_builder.ui.montagens.editor
 
 import androidx.compose.foundation.clickable
@@ -56,6 +57,9 @@ fun EditorMontagemScreen(
     val ids by viewModel.idsSelecionados.collectAsStateWithLifecycle()
     val selecionados by viewModel.selecionados.collectAsStateWithLifecycle()
     val total by viewModel.total.collectAsStateWithLifecycle()
+    val orcamentoPadrao by viewModel.orcamentoPadrao.collectAsStateWithLifecycle()
+
+    val orcamentoRestante = orcamentoPadrao - total
 
     var tentouSalvar by rememberSaveable { mutableStateOf(false) }
     var escolhendo by rememberSaveable { mutableStateOf(false) }
@@ -64,16 +68,29 @@ fun EditorMontagemScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (viewModel.editando) "Editar montagem" else "Nova montagem") },
+                title = {
+                    Text(
+                        if (viewModel.editando) "Editar montagem"
+                        else "Nova montagem"
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onVoltar) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
                     }
                 },
                 actions = {
                     if (viewModel.editando) {
-                        IconButton(onClick = { confirmandoExclusao = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Excluir montagem")
+                        IconButton(
+                            onClick = { confirmandoExclusao = true }
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Excluir montagem"
+                            )
                         }
                     }
                 }
@@ -100,10 +117,17 @@ fun EditorMontagemScreen(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    Button(onClick = {
-                        tentouSalvar = true
-                        if (nome.isNotBlank()) viewModel.salvar(onVoltar)
-                    }) { Text("Salvar montagem") }
+
+                    Button(
+                        onClick = {
+                            tentouSalvar = true
+                            if (nome.isNotBlank()) {
+                                viewModel.salvar(onVoltar)
+                            }
+                        }
+                    ) {
+                        Text("Salvar montagem")
+                    }
                 }
             }
         }
@@ -115,18 +139,102 @@ fun EditorMontagemScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
+
+            // Nome da montagem
             item {
                 val erro = tentouSalvar && nome.isBlank()
+
                 OutlinedTextField(
                     value = nome,
                     onValueChange = viewModel::onNomeChange,
                     label = { Text("Nome da montagem *") },
                     isError = erro,
-                    supportingText = if (erro) ({ Text("Campo obrigatório") }) else null,
+                    supportingText = if (erro) {
+                        { Text("Campo obrigatório") }
+                    } else {
+                        null
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
+            // Orçamento padrão
+            if (orcamentoPadrao > 0.0) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "Orçamento padrão",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    "Limite definido",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    formatarPreco(orcamentoPadrao),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    "Total da montagem",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    formatarPreco(total),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    if (orcamentoRestante >= 0.0) {
+                                        "Orçamento restante"
+                                    } else {
+                                        "Valor excedido"
+                                    },
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Text(
+                                    formatarPreco(kotlin.math.abs(orcamentoRestante)),
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (orcamentoRestante >= 0.0) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.error
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Componentes selecionados
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -138,12 +246,14 @@ fun EditorMontagemScreen(
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f)
                     )
+
                     OutlinedButton(onClick = { escolhendo = true }) {
                         Icon(Icons.Default.Add, contentDescription = null)
                         Text(" Adicionar")
                     }
                 }
             }
+
             if (selecionados.isEmpty()) {
                 item {
                     Text(
@@ -152,12 +262,17 @@ fun EditorMontagemScreen(
                     )
                 }
             }
+
             items(selecionados, key = { it.id }) { c ->
-                ItemSelecionado(c, onRemover = { viewModel.alternar(c.id) })
+                ItemSelecionado(
+                    c,
+                    onRemover = { viewModel.alternar(c.id) }
+                )
             }
         }
     }
 
+    // Diálogo de seleção de componentes
     if (escolhendo) {
         AlertDialog(
             onDismissRequest = { escolhendo = false },
@@ -171,15 +286,23 @@ fun EditorMontagemScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { viewModel.alternar(c.id) },
+                                    .clickable {
+                                        viewModel.alternar(c.id)
+                                    },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(
                                     checked = c.id in ids,
-                                    onCheckedChange = { viewModel.alternar(c.id) }
+                                    onCheckedChange = {
+                                        viewModel.alternar(c.id)
+                                    }
                                 )
+
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(c.nome, style = MaterialTheme.typography.bodyLarge)
+                                    Text(
+                                        c.nome,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                     Text(
                                         "${c.categoria.rotuloCurto} • ${formatarPreco(c.preco)}",
                                         style = MaterialTheme.typography.bodySmall,
@@ -192,34 +315,50 @@ fun EditorMontagemScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { escolhendo = false }) { Text("Concluir") }
+                TextButton(onClick = { escolhendo = false }) {
+                    Text("Concluir")
+                }
             }
         )
     }
 
+    // Confirmação de exclusão
     if (confirmandoExclusao) {
         AlertDialog(
             onDismissRequest = { confirmandoExclusao = false },
             title = { Text("Excluir montagem?") },
-            text = { Text("“$nome” será removida. Os componentes continuam no catálogo.") },
+            text = {
+                Text("“$nome” será removida. Os componentes continuam no catálogo.")
+            },
             confirmButton = {
-                TextButton(onClick = {
-                    confirmandoExclusao = false
-                    viewModel.excluir(onVoltar)
-                }) { Text("Excluir") }
+                TextButton(
+                    onClick = {
+                        confirmandoExclusao = false
+                        viewModel.excluir(onVoltar)
+                    }
+                ) {
+                    Text("Excluir")
+                }
             },
             dismissButton = {
-                TextButton(onClick = { confirmandoExclusao = false }) { Text("Cancelar") }
+                TextButton(onClick = { confirmandoExclusao = false }) {
+                    Text("Cancelar")
+                }
             }
         )
     }
 }
 
 @Composable
-private fun ItemSelecionado(componente: Componente, onRemover: () -> Unit) {
+private fun ItemSelecionado(
+    componente: Componente,
+    onRemover: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -239,13 +378,18 @@ private fun ItemSelecionado(componente: Componente, onRemover: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
             Text(
                 formatarPreco(componente.preco),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
+
             IconButton(onClick = onRemover) {
-                Icon(Icons.Default.Close, contentDescription = "Remover da montagem")
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Remover da montagem"
+                )
             }
         }
     }
