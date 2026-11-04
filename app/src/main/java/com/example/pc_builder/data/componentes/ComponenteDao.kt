@@ -30,8 +30,15 @@ interface ComponenteDao {
           AND (nome LIKE '%' || :busca || '%'
                OR modelo LIKE '%' || :busca || '%'
                OR marca LIKE '%' || :busca || '%')
-        ORDER BY nome COLLATE NOCASE ASC
+        ORDER BY
+            CASE WHEN :ordenacao = 'PRECO_MENOR' THEN preco END ASC,
+            CASE WHEN :ordenacao = 'PRECO_MAIOR' THEN preco END DESC,
+            nome COLLATE NOCASE ASC
         """
     )
-    fun observar(busca: String, categoria: String?): Flow<List<Componente>>
+    fun observar(
+        busca: String,
+        categoria: String?,
+        ordenacao: String
+    ): Flow<List<Componente>>
 }

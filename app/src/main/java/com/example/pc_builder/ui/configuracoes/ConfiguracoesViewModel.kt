@@ -16,12 +16,30 @@ import kotlinx.coroutines.launch
 class ConfiguracoesViewModel(
     private val repository: ConfiguracoesRepository
 ) : ViewModel() {
+
     val configuracoes: StateFlow<Configuracoes?> =
         repository.observar()
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    // Define o tema claro ou escuro
     fun definirTemaEscuro(escuro: Boolean) {
-        viewModelScope.launch { repository.definirTemaEscuro(escuro) }
+        viewModelScope.launch {
+            repository.definirTemaEscuro(escuro)
+        }
+    }
+
+    // Define o orçamento padrão
+    fun definirOrcamento(valor: Double) {
+        viewModelScope.launch {
+            repository.definirOrcamento(valor)
+        }
+    }
+
+    // Define a forma de ordenação dos componentes
+    fun definirOrdenacao(ordenacao: String) {
+        viewModelScope.launch {
+            repository.definirOrdenacao(ordenacao)
+        }
     }
 
     companion object {
